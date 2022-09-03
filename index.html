@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>External CRM API</title>
+<script>
+"use strict";
+let apiAccolades = null;
+function startConector() {
+  let info = {};
+  let i = 0;
+  let paramPair = [];
+  // the connection parameters are send to this script using GET parameters
+  // ex: serverFqdn=client.voipit.ro&serverPort=14327&agentId=123456
+  // the next line splits the entire GET string into "name=value" strings,
+  // one for each parameter
+  let urlParam = location.search.slice(1).split("&");
+  for (i = 0; i < urlParam.length; i++) {
+    // each "name=value" string is split and the info object is populated
+    paramPair = urlParam[i].split("=");
+    info[paramPair[0]] = paramPair[1];
+  }
+  window.WebSocket = window.WebSocket || window.MozWebSocket;
+  if (!window.WebSocket) {
+    console.log("Your browser does not support web-sockets");
+    return false;
+  }
+  try {
+    apiAccolades = new WebSocket(
+      "wss://" + info.serverFqdn + ":" + info.serverPort
+    );
+  } catch (error) {
+    // web-socket error
+    console.log(error);
+    return false;
+  }
+  // after the connection has been established
+  // an authentication package is send
+  // the agent id is read from the GET params
+  apiAccolades.onopen = function () {
+    let requestPackage = {
+      "type":"authRequest",
+      "idCrm":info.agentId
+    };
+    apiAccolades.send(JSON.stringify(requestPackage));
+  };
+  apiAccolades.onerror = function (error) {
+    console.log(error);
+  };
+  // when a message is received
+  // the following function will be triggered
+  apiAccolades.onmessage = function (rawMessage) {
+    let message = JSON.parse(rawMessage.data);
+    switch(message.type) {
+      case "authSucces":
+      console.log("Connection established");
+      // after the auth package has been received
+      // I will ask for the api configuration
+      let requestPackage = {
+        "type":"configuration"
+      };
+      apiAccolades.send(JSON.stringify(requestPackage));
+      break;
+    case "authFailed":
+      console.log("Authentication failed (" + message.reason + ")");
+      break;
+    case "configuration":
+      console.log("Account (" + JSON.stringify(message.account) + ")");
+      console.log("Phone (" + JSON.stringify(message.phone) + ")");
+      console.log("Agent (" + JSON.stringify(message.agent) + ")");
+      break;
+    case "connectionClosed":
+      console.log("Connection closed");
+      break;
+    case "incomingCall":
+      console.log("Incoming call from " + message.phoneNumber);
+      break;
+    case "outgoingCall":
+      console.log("Outgoing call from " + message.phoneNumber);
+      break;
+    case "error":
+      console.log("Error");
+      break;
+    default:
+      // this message will be ignored
+    }
+  }
+}
+</script>
+</head>
+<body onload="startConector()">
+</body>
+</html>
