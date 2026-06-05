@@ -52,7 +52,7 @@ function startConector() {
   apiAccolades.onmessage = function (rawMessage) {
     let message = JSON.parse(rawMessage.data);
     switch(message.type) {
-      case "authSucces":
+      case "authSuccess":
       console.log("Connection established");
       // after the auth package has been received
       // I will ask for the api configuration
