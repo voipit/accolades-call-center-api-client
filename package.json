@@ -1,0 +1,15 @@
+{
+	"name": "accolades-connector-example",
+	"version": "2.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"lint": "eslint connector.js",
+		"lint:html": "html-validate index.html",
+		"validate": "npm run lint && npm run lint:html"
+	},
+	"devDependencies": {
+		"eslint": "^10.4.1",
+		"html-validate": "^11.4.0"
+	}
+}

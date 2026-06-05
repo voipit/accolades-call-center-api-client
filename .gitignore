@@ -1,0 +1,19 @@
+# Eclipse
+.settings/
+.project
+
+# DBeaver
+.dbeaver/
+
+# Node.js
+node_modules/
+
+# npm
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
